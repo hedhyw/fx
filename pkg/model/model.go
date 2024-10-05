@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/charmbracelet/bubbles/viewport"
 	"io"
 	"regexp"
 	"strconv"
@@ -74,6 +75,8 @@ type model struct {
 	searchInput           textinput.Model
 	search                *search
 	yank                  bool
+	showPreview           bool
+	preview               viewport.Model
 }
 
 func (m *model) Init() tea.Cmd {
@@ -85,6 +88,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.termWidth = msg.Width
 		m.termHeight = msg.Height
+		m.preview.Width = m.termWidth
+		m.preview.Height = m.termHeight - 1
 		wrapAll(m.top, m.termWidth)
 		m.redoSearch()
 
@@ -122,6 +127,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.KeyMsg:
+		if m.showPreview {
+			return m.handlePreviewKey(msg)
+		}
 		if m.digInput.Focused() {
 			return m.handleDigKey(msg)
 		}
@@ -219,6 +227,18 @@ func (m *model) handleDigKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.selectNode(n)
 		}
 	}
+	return m, cmd
+}
+
+func (m *model) handlePreviewKey(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	if msg, ok := msg.(tea.KeyMsg); ok {
+		switch {
+		case key.Matches(msg, keyMap.Quit):
+			m.showPreview = false
+		}
+	}
+	m.preview, cmd = m.preview.Update(msg)
 	return m, cmd
 }
 
@@ -387,6 +407,23 @@ func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case key.Matches(msg, keyMap.Yank):
 		m.yank = true
 
+	case key.Matches(msg, keyMap.Preview):
+		at := m.cursorPointsTo()
+		parent := at.parent()
+		if parent != nil && parent.chunk != nil {
+			at = parent
+		}
+		if at != nil && len(at.value) > 0 && at.value[0] == '"' {
+			m.showPreview = true
+			str, err := strconv.Unquote(string(at.value))
+			if err == nil {
+				m.preview.SetContent(str)
+			} else {
+				m.preview.SetContent(err.Error())
+			}
+			m.preview.GotoTop()
+		}
+
 	case key.Matches(msg, keyMap.Dig):
 		m.digInput.SetValue(m.cursorPath() + ".")
 		m.digInput.CursorEnd()
@@ -457,6 +494,11 @@ func (m *model) scrollIntoView() {
 }
 
 func (m *model) View() string {
+	if m.showPreview {
+		statusBar := flex(m.termWidth, m.cursorPath(), m.fileName)
+		return m.preview.View() + "\n" + string(currentTheme.StatusBar([]byte(statusBar)))
+	}
+
 	var screen []byte
 	n := m.head
 
