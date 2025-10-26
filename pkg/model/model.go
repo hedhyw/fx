@@ -236,6 +236,11 @@ func (m *model) handlePreviewKey(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, keyMap.Quit):
 			m.showPreview = false
+		case key.Matches(msg, keyMap.Yank):
+			str, err := strconv.Unquote(m.cursorValue())
+			if err == nil {
+				_ = clipboard.WriteAll(str)
+			}
 		}
 	}
 	m.preview, cmd = m.preview.Update(msg)
