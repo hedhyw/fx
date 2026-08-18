@@ -12,7 +12,7 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/sahilm/fuzzy"
 
-	jsonpath "github.com/antonmedv/fx/path"
+	jsonpath "github.com/hedhyw/fx/path"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"

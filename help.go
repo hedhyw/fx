@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/antonmedv/fx/pkg/model"
+	"github.com/hedhyw/fx/pkg/model"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/lipgloss"

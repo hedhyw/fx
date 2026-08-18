@@ -1,4 +1,4 @@
-module github.com/antonmedv/fx
+module github.com/hedhyw/fx
 
 go 1.20
 

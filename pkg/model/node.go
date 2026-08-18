@@ -3,7 +3,7 @@ package model
 import (
 	"strconv"
 
-	jsonpath "github.com/antonmedv/fx/path"
+	jsonpath "github.com/hedhyw/fx/path"
 )
 
 type node struct {

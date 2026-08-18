@@ -9,7 +9,7 @@ import (
 	"path"
 	"runtime/pprof"
 
-	"github.com/antonmedv/fx/pkg/model"
+	"github.com/hedhyw/fx/pkg/model"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mattn/go-isatty"
 )
